@@ -1,10 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import Loader from '../components/Loader';
+import { createContext, useContext, useState, useEffect } from "react";
+import Loader from "../components/Loader";
+import { account } from "./appwrite";
 
 const UserContext = createContext();
 
 export const useUser = () => useContext(UserContext);
 
+// eslint-disable-next-line react/prop-types
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -12,9 +14,10 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const getUser = async () => {
       try {
-        setTimeout(() => {
-          setUser({ email: 'test@test.com' });
-        }, 2000);
+        setLoading(true);
+        const response = await account.get();
+        setUser(response);
+        // setTimeout(() => {}, 2000);
       } catch (error) {
         setUser(null);
       } finally {
@@ -26,7 +29,7 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   if (loading) {
-    return <Loader /> // Replace with your loading spinner/component
+    return <Loader />; // Replace with your loading spinner/component
   }
 
   return (
