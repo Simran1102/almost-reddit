@@ -1,3 +1,7 @@
+import { ID } from "appwrite";
+import { database } from "./appwrite";
+import { APPWRITE_DATABASE_ID, APPWRITE_POST_COLLECTION_ID } from "./constants";
+
 // Posts API
 export const createPost = async (title, content, imageURL) => {
   try {
@@ -9,7 +13,19 @@ export const createPost = async (title, content, imageURL) => {
       imageURL,
       createdAt: Date.now(),
     };
-    return post;
+
+    const response = await database.createDocument(
+      APPWRITE_DATABASE_ID,
+      APPWRITE_POST_COLLECTION_ID,
+      ID.unique(),
+      {
+        title: title,
+        description: content,
+      }
+    );
+
+    console.log(response);
+    return response;
   } catch (error) {
     console.error(error);
     throw error;
@@ -20,20 +36,19 @@ export const fetchPosts = async () => {
   try {
     //TODO: Add Fetch
     // Mock Data
-    return [
-      {
-        title: "Post 1",
-        content: "Content 1",
-        imageURL: "https://via.placeholder.com/150",
-        createdAt: Date.now(),
-      },
-      {
-        title: "Post 2",
-        content: "Content 2",
-        imageURL: "https://via.placeholder.com/150",
-        createdAt: Date.now(),
-      },
-    ];
+
+    let promise = await database.listDocuments(
+      APPWRITE_DATABASE_ID,
+      APPWRITE_POST_COLLECTION_ID
+    );
+
+    console.log(promise);
+    const data = promise.documents;
+    const updatedData = data.map((item) => {
+      const { description, ...rest } = item;
+      return { content: description, ...rest };
+    });
+    return updatedData;
   } catch (error) {
     console.error(error);
     throw error;
@@ -43,7 +58,14 @@ export const fetchPosts = async () => {
 export const deletePost = async (postId) => {
   try {
     // TODO: Add Delete
-    throw new Error("Not implemented");
+
+    let promise = await database.deleteDocument(
+      APPWRITE_DATABASE_ID,
+      APPWRITE_POST_COLLECTION_ID,
+      postId
+    );
+
+    return promise;
   } catch (error) {
     console.error(error);
     throw error;
